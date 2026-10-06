@@ -384,10 +384,9 @@ img {
     }
 }
 
-/* ---------- Тач-устройства ---------- */
 @media (hover: none) {
 
-    /* стрелки у лент не нужны, листаем пальцем */
+
     section button[aria-label="Назад"],
     section button[aria-label="Дальше"] {
         display: none;
