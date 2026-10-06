@@ -1,0 +1,21 @@
+import { Route, Routes } from 'react-router-dom'
+import Header from './components/Header'
+import Footer from './components/Footer'
+import Homes from './pages/Homes'
+import Aboute from './pages/Aboute'
+
+export default function App() {
+  return (
+    <>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Homes />} />
+        <Route path="/homes" element={<Homes />} />
+        <Route path="/experiences" element={<Aboute title="Впечатления" />} />
+        <Route path="/services" element={<Aboute title="Услуги" />} />
+        <Route path="*" element={<Aboute title="Страница не найдена" />} />
+      </Routes>
+      <Footer />
+    </>
+  )
+}

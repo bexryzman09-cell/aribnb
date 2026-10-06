@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+    --color-brand: #ff385c;
+    --color-ink: #222;
+    --color-muted: #6a6a6a;
+    --color-line: #ddd;
+    --color-soft: #f2f2f2;
+    --color-grey: #ebebeb;
+
+    --font-sans: Circular, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    --ease-smooth: cubic-bezier(.2, .8, .2, 1);
+
+    --animate-pop: pop .2s cubic-bezier(.2, .8, .2, 1);
+
+    @keyframes pop {
+        from {
+            opacity: 0;
+            transform: translateY(-8px) scale(.98);
+        }
+    }
+}
+
+@layer base {
+    body {
+        @apply bg-white text-ink;
+    }
+
+    button {
+        cursor: pointer;
+    }
+}
+
+.no-scrollbar {
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
