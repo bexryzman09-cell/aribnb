@@ -22,9 +22,9 @@ export default function LocaleModal() {
     const h2 = 'text-[22px] font-medium'
 
     return (
-        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/50 p-4" onClick={closeLocale}>
+        <div className="fixed inset-0 z-100 grid place-items-center bg-black/50 p-4" onClick={closeLocale}>
             <div role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}
-                className="animate-pop relative max-h-[calc(100vh_-_32px)] w-full max-w-[1032px] overflow-y-auto rounded-[32px] bg-white px-6 pb-12 pt-6 sm:px-6">
+                className="animate-pop relative max-h-[calc(100vh-32px)] w-full max-w-258 overflow-y-auto rounded-4xl bg-white px-6 pb-12 pt-6 sm:px-6">
                 <button type="button" aria-label={t('close')} onClick={closeLocale}
                     className="grid h-8 w-8 place-items-center rounded-full hover:bg-soft">
                     <svg viewBox="0 0 32 32" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="3"><path d="m4 4 24 24M28 4 4 28" /></svg>

@@ -5,7 +5,8 @@ import Homes from './pages/Homes'
 import Aboute from './pages/Aboute'
 import Host from './pages/Host'
 import ListingPage from './pages/ListingPage'
-
+import Help from './pages/Help'
+import Refeal from './pages/Refeal'
 export default function App() {
   return (
     <>
@@ -18,7 +19,9 @@ export default function App() {
         <Route path="/services" element={<Aboute title="Услуги" />} />
         <Route path="/host" element={<Host />} />
         <Route path="*" element={<Aboute title="Страница не найдена" />} />
-        <Route path="/listing/:id"element={<ListingPage />} />
+        <Route path="/listing/:id" element={<ListingPage />} />
+        <Route path="/help" element={<Help />} />
+         <Route path="/invite" element={<Refeal />} />
       </Routes>
 
       <Footer />

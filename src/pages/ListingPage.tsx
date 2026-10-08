@@ -193,11 +193,11 @@ export default function ListingPage() {
                     Назад
                 </button>
 
-                {/* Основная карточка */}
+
                 <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
 
-                    {/* Фотография */}
-                    <div className="relative aspect-[16/9] w-full bg-gray-100 sm:aspect-[2/1]">
+                   
+                    <div className="relative aspect-video w-full bg-gray-100 sm:aspect-2/1">
                         <img
                             src={image}
                             alt={title}
@@ -311,11 +311,11 @@ export default function ListingPage() {
                                                 setTitle(e.target.value)
                                             }
                                             placeholder="Уютная квартира"
-                                            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                                            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:ring-1 focus:ring-black"
                                         />
                                     </div>
 
-                                    {/* Местоположение */}
+                                  
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-gray-900">
                                             Местоположение
@@ -328,11 +328,11 @@ export default function ListingPage() {
                                                 setLocation(e.target.value)
                                             }
                                             placeholder="Ташкент"
-                                            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                                            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:ring-1 focus:ring-black"
                                         />
                                     </div>
 
-                                    {/* Адрес */}
+                                    
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-gray-900">
                                             Адрес
@@ -345,11 +345,11 @@ export default function ListingPage() {
                                                 setAddress(e.target.value)
                                             }
                                             placeholder="ул. Навои, 15"
-                                            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                                            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:ring-1 focus:ring-black"
                                         />
                                     </div>
 
-                                    {/* Цена */}
+                                  
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-gray-900">
                                             Цена за ночь ($)
@@ -371,13 +371,13 @@ export default function ListingPage() {
                                                 }
                                             }}
                                             placeholder="50"
-                                            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                                            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:ring-1 focus:ring-black"
                                         />
                                     </div>
 
                                 </div>
 
-                                {/* Рейтинг */}
+                            
                                 <div className="rounded-xl bg-gray-50 p-4">
                                     <div className="flex items-center justify-between">
                                         <div>

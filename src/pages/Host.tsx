@@ -122,7 +122,7 @@ export default function Host() {
                                 placeholder="Уютная квартира"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-black sm:text-base"
+                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition sm:text-base"
                             />
                         </div>
 
@@ -136,7 +136,7 @@ export default function Host() {
                                 placeholder="Ташкент"
                                 value={location}
                                 onChange={(e) => setLocation(e.target.value)}
-                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-black sm:text-base"
+                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition sm:text-base"
                             />
                         </div>
 
@@ -150,7 +150,7 @@ export default function Host() {
                                 placeholder="ул. Навои, 15"
                                 value={address}
                                 onChange={(e) => setAddress(e.target.value)}
-                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-black sm:text-base"
+                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition sm:text-base"
                             />
                         </div>
 
@@ -174,7 +174,7 @@ export default function Host() {
                                         setPrice(value)
                                     }
                                 }}
-                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-black sm:text-base"
+                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition sm:text-base"
                             />
                         </div>
 

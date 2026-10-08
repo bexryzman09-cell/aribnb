@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { destinations, tabs } from '../data/data'
+import SettingsModal, { Avatar, type Profile } from './Settingsmodal'
 
 type Seg = 'where' | 'when' | 'who' | null
 type GKey = 'adults' | 'children' | 'infants' | 'pets'
@@ -50,6 +51,27 @@ const CHIP_ON =
     'border-ink bg-[#f7f7f7] shadow-[0_0_0_1px_#222]'
 
 const HINT = 'mt-0.5 block text-sm text-muted'
+
+// из записи пользователя убираем пароль и id — в сессии они не нужны
+const toProfile = (u: any): Profile => {
+    const p = { ...u }
+
+    delete p.password
+    delete p.id
+
+    return p as Profile
+}
+
+const readUsers = (): any[] =>
+    JSON.parse(localStorage.getItem('airbnb_users') || '[]')
+
+const writeUsers = (users: any[]) =>
+    localStorage.setItem('airbnb_users', JSON.stringify(users))
+
+const startSession = (profile: Profile) => {
+    localStorage.setItem('airbnb_user', JSON.stringify(profile))
+    localStorage.setItem('airbnb_logged_in', 'true')
+}
 
 
 function Tab({ t }: { t: (typeof tabs)[number] }) {
@@ -149,14 +171,15 @@ export default function Header() {
             'true'
     )
 
-    const [user, setUser] = useState<{
-        name: string
-        email: string
-    } | null>(() => {
+    const [user, setUser] = useState<Profile | null>(() => {
         const saved = localStorage.getItem('airbnb_user')
 
         return saved ? JSON.parse(saved) : null
     })
+
+    // ================= SETTINGS =================
+
+    const [settingsOpen, setSettingsOpen] = useState(false)
 
     // ================= SEARCH STATE =================
 
@@ -235,6 +258,7 @@ export default function Header() {
             if (e.key === 'Escape') {
                 closeSearch()
                 setAuthOpen(false)
+                setSettingsOpen(false)
             }
         }
 
@@ -302,12 +326,7 @@ export default function Header() {
             return
         }
 
-
-        // Получаем пользователей из localStorage
-
-        const users = JSON.parse(
-            localStorage.getItem('airbnb_users') || '[]'
-        )
+        const users = readUsers()
 
 
         // ================= REGISTER =================
@@ -326,7 +345,6 @@ export default function Header() {
                 return
             }
 
-
             const newUser = {
                 id: Date.now(),
                 name: authName.trim(),
@@ -334,38 +352,14 @@ export default function Header() {
                 password: authPassword
             }
 
-
             users.push(newUser)
+            writeUsers(users)
 
+            const profile = toProfile(newUser)
 
-            localStorage.setItem(
-                'airbnb_users',
-                JSON.stringify(users)
-            )
-
-
-            localStorage.setItem(
-                'airbnb_user',
-                JSON.stringify({
-                    name: newUser.name,
-                    email: newUser.email
-                })
-            )
-
-
-            localStorage.setItem(
-                'airbnb_logged_in',
-                'true'
-            )
-
-
-            setUser({
-                name: newUser.name,
-                email: newUser.email
-            })
-
+            startSession(profile)
+            setUser(profile)
             setIsLoggedIn(true)
-
             setAuthOpen(false)
 
             return
@@ -380,7 +374,6 @@ export default function Header() {
                 u.password === authPassword
         )
 
-
         if (!foundUser) {
             setAuthError(
                 'Неверный email или пароль'
@@ -388,82 +381,101 @@ export default function Header() {
             return
         }
 
+        const profile = toProfile(foundUser)
 
-        localStorage.setItem(
-            'airbnb_user',
-            JSON.stringify({
-                name: foundUser.name,
-                email: foundUser.email
-            })
-        )
-
-
-        localStorage.setItem(
-            'airbnb_logged_in',
-            'true'
-        )
-
-
-        setUser({
-            name: foundUser.name,
-            email: foundUser.email
-        })
-
+        startSession(profile)
+        setUser(profile)
         setIsLoggedIn(true)
-
         setAuthOpen(false)
     }
 
 
     const logout = () => {
-
-        localStorage.clear()
+        localStorage.removeItem('airbnb_user')
+        localStorage.removeItem('airbnb_logged_in')
         setUser(null)
         setIsLoggedIn(false)
         setMenuOpen(false)
         setAuthOpen(false)
+        setSettingsOpen(false)
         closeSearch()
         window.location.reload()
     }
 
 
+    // ================= SETTINGS FUNCTIONS =================
+
+    const saveProfile = (p: Profile) => {
+        setUser(p)
+        localStorage.setItem('airbnb_user', JSON.stringify(p))
+
+        writeUsers(
+            readUsers().map((u: any) =>
+                u.email === p.email ? { ...u, ...p } : u
+            )
+        )
+    }
+
+    const changePassword = (oldPass: string, newPass: string) => {
+        const users = readUsers()
+        const me = users.find((u: any) => u.email === user?.email)
+
+        if (!me || me.password !== oldPass) {
+            return 'Неверный текущий пароль'
+        }
+
+        me.password = newPass
+        writeUsers(users)
+
+        return null
+    }
+
+    const deleteAccount = () => {
+        writeUsers(
+            readUsers().filter((u: any) => u.email !== user?.email)
+        )
+
+        logout()
+    }
 
 
     const socialLogin = (
         provider: 'google' | ''
     ) => {
 
-        const socialUser = {
-            name:
-                provider === 'google'
-                    ? 'Google пользователь'
-                    : 'Apple пользователь',
+        const email =
+            provider === 'google'
+                ? 'google@example.com'
+                : 'apple@example.com'
 
-            email:
-                provider === 'google'
-                    ? 'google@example.com'
-                    : 'apple@example.com'
+        const users = readUsers()
+
+        let found = users.find((u: any) => u.email === email)
+
+        if (!found) {
+            found = {
+                id: Date.now(),
+                name:
+                    provider === 'google'
+                        ? 'Google пользователь'
+                        : 'Apple пользователь',
+                email
+            }
+
+            users.push(found)
+            writeUsers(users)
         }
 
+        const profile = toProfile(found)
 
-        localStorage.setItem(
-            'airbnb_user',
-            JSON.stringify(socialUser)
-        )
-
-        localStorage.setItem(
-            'airbnb_logged_in',
-            'true'
-        )
-
-
-        setUser(socialUser)
+        startSession(profile)
+        setUser(profile)
         setIsLoggedIn(true)
         setAuthOpen(false)
     }
 
 
-    // ================= SEARCH =================
+    // ================= SEARCH HELPERS =================
 
     const q = where.trim().toLowerCase()
 
@@ -917,7 +929,7 @@ export default function Header() {
 
                         <span className="max-[900px]:hidden">
                             airbnb
-                        </span>
+                        </span> 
                     </Link>
 
 
@@ -1014,27 +1026,29 @@ export default function Header() {
                                     <path d="M2 8h28M2 16h28M2 24h28" />
                                 </svg>
 
-                                <svg
-                                    viewBox="0 0 32 32"
-                                    width="30"
-                                    height="30"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                >
-                                    <circle
-                                        cx="16"
-                                        cy="16"
-                                        r="14"
-                                    />
+                                {isLoggedIn && user ? (
+                                    <Avatar user={user} size={30} />
+                                ) : (
+                                    <svg
+                                        viewBox="0 0 32 32"
+                                        width="30"
+                                        height="30"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <circle
+                                            cx="16"
+                                            cy="16"
+                                            r="14"
+                                        />
 
-                                    <path d="M26.5 25.6c-1.600-2.800-4.300-4.900-7.500-5.700v-.7c1.800-1 3-3 3-5.200 0-3.300-2.700-6-6-6s-6 2.700-6 6c0 2.200 1.200 4.100 3 5.200v.7c-3.200.8-5.800 2.900-7.400 5.600" />
-                                </svg>
+                                        <path d="M26.5 25.6c-1.600-2.800-4.300-4.900-7.500-5.700v-.7c1.800-1 3-3 3-5.200 0-3.300-2.700-6-6-6s-6 2.700-6 6c0 2.200 1.200 4.100 3 5.200v.7c-3.200.8-5.800 2.900-7.400 5.600" />
+                                    </svg>
+                                )}
 
                             </button>
 
-
-                            {/* MENU */}
 
                             <div
                                 hidden={!menuOpen}
@@ -1043,53 +1057,33 @@ export default function Header() {
 
                                 {isLoggedIn ? (
                                     <>
-                                        {/* USER INFO */}
 
-                                        <div className="px-4 py-3">
-                                            <div className="font-semibold">
-                                                {user?.name}
-                                            </div>
+                                        <div className="flex items-center gap-3 px-4 py-3">
+                                            <Avatar user={user} size={40} />
 
-                                            <div className="mt-1 truncate text-xs text-muted">
-                                                {user?.email}
+                                            <div className="min-w-0">
+                                                <div className="truncate font-semibold">
+                                                    {user?.name}
+                                                </div>
+
+                                                <div className="mt-0.5 truncate text-xs text-muted">
+                                                    {user?.email}
+                                                </div>
                                             </div>
                                         </div>
 
                                         <hr className="my-2 border-t border-line" />
 
-
-                                        <Link
-                                            to="/notifications"
-                                            onClick={() =>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
                                                 setMenuOpen(false)
-                                            }
-                                            className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-soft"
+                                                setSettingsOpen(true)
+                                            }}
+                                            className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-soft"
                                         >
-                                            ♧
-                                            Уведомления
-                                        </Link>
-
-                                        <Link
-                                            to="/settings"
-                                            onClick={() =>
-                                                setMenuOpen(false)
-                                            }
-                                            className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-soft"
-                                        >
-                                            ⚙
-                                            Настройки аккаунта
-                                        </Link>
-
-                                        <Link
-                                            to="/language"
-                                            onClick={() =>
-                                                setMenuOpen(false)
-                                            }
-                                            className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-soft"
-                                        >
-                                            ◎
-                                            Языки и валюта
-                                        </Link>
+                                            ⚙ Настройки аккаунта
+                                        </button>
 
                                         <Link
                                             to="/help"
@@ -1117,7 +1111,7 @@ export default function Header() {
                                         </Link>
 
                                         <Link
-                                            to="/host/invite"
+                                            to="/invite"
                                             onClick={() =>
                                                 setMenuOpen(false)
                                             }
@@ -1127,7 +1121,7 @@ export default function Header() {
                                         </Link>
 
                                         <Link
-                                            to="/host/cohost"
+                                            to="/invite"
                                             onClick={() =>
                                                 setMenuOpen(false)
                                             }
@@ -1143,7 +1137,7 @@ export default function Header() {
                                         <button
                                             type="button"
                                             onClick={logout}
-                                            className="block w-full px-4 py-3 text-left text-sm hover:bg-soft"
+                                            className="block w-full rounded-b-2xl px-4 py-3 text-left text-sm hover:bg-soft"
                                         >
                                             Выйти
                                         </button>
@@ -1187,7 +1181,7 @@ export default function Header() {
                 </div>
 
 
-
+                {/* SEARCH FORM */}
 
                 <form
                     ref={searchRef}
@@ -1202,7 +1196,7 @@ export default function Header() {
                         }`}
                 >
 
-
+                    {/* WHERE */}
 
                     <div
                         className={segCls('where')}
@@ -1318,6 +1312,7 @@ export default function Header() {
                     </div>
 
 
+                    {/* WHEN */}
 
                     <div
                         className={segCls('when')}
@@ -1429,9 +1424,7 @@ export default function Header() {
                     >
                         {searchIcon(16)}
 
-                        <span>
-                            Искать
-                        </span>
+                       
                     </button>
 
 
@@ -1713,8 +1706,6 @@ export default function Header() {
 
                 <div className="relative w-full max-w-120 rounded-[28px] bg-white p-8 shadow-2xl">
 
-                    {/* CLOSE */}
-
                     <button
                         type="button"
                         onClick={closeAuth}
@@ -1724,8 +1715,6 @@ export default function Header() {
                     </button>
 
 
-                    {/* LOGO */}
-
                     <div className="mb-5 flex justify-center">
 
                         <svg
@@ -1734,13 +1723,11 @@ export default function Header() {
                             height="42"
                             fill="#ff385c"
                         >
-                            <path d="M16 1c-2 0-3.7 1.1-4.8 3.2L3.3 19.9c-.5 1.1-.9 2.2-.9 3.4C2.4 26.6 4.9 29 8 29c2.1 0 4.3-1.3 6.7-3.8.5-.5.9-1 1.3-1.5.4.5.8 1 1.3 1.5C19.7 27.7 21.9 29 24 29c3.1 0 5.6-2.4 5.6-5.7 0-1.2-.4-2.3-.9-3.4L20.8 4.2C19.7 2.1 18 1 16 1z" />
+                            <path d="M16 1c-2 0-3.7 1.1-4.8 3.2L3.3 19.9c-.5 1.1-.9 2.2-.9 3.4C2.4 26.6 4.9 29 8 29c2.1 0 4.3-1.3 6.7-3.8.5-.5.9-1 1.3-1.5.4.5.8 1 1.3 1.5C19.7 27.700 21.9 29 24 29c3.1 0 5.6-2.4 5.6-5.7 0-1.2-.4-2.3-.9-3.4L20.8 4.2C19.7 2.1 18 1 16 1z" />
                         </svg>
 
                     </div>
 
-
-                    {/* TITLE */}
 
                     <h2 className="mb-6 text-center text-2xl font-semibold">
                         {authMode === 'register'
@@ -1748,8 +1735,6 @@ export default function Header() {
                             : 'Войти в аккаунт'}
                     </h2>
 
-
-                    {/* FORM */}
 
                     <form
                         onSubmit={handleAuth}
@@ -1816,7 +1801,6 @@ export default function Header() {
                     </form>
 
 
-
                     <div className="my-5 flex items-center gap-3">
 
                         <div className="h-px flex-1 bg-line" />
@@ -1829,8 +1813,6 @@ export default function Header() {
 
                     </div>
 
-
-                    {/* GOOGLE */}
 
                     <button
                         type="button"
@@ -1846,11 +1828,6 @@ export default function Header() {
                         Продолжить с Google
                     </button>
 
-
-
-
-
-                    {/* SWITCH */}
 
                     <div className="mt-6 text-center text-sm">
 
@@ -1895,6 +1872,18 @@ export default function Header() {
                 </div>
 
             </div>
+
+
+            {/* ================= SETTINGS MODAL ================= */}
+
+            <SettingsModal
+                open={settingsOpen}
+                user={user}
+                onClose={() => setSettingsOpen(false)}
+                onSave={saveProfile}
+                onChangePassword={changePassword}
+                onDelete={deleteAccount}
+            />
 
         </>
     )

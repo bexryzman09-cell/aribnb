@@ -135,7 +135,7 @@ export default function Section({
             }
             disabled={!on}
             onClick={() => go(dir)}
-            className="grid size-8 place-items-center rounded-full border border-line bg-white transition hover:scale-105 hover:shadow disabled:cursor-default disabled:opacity-30"
+            className="grid  size-10  place-items-center rounded-full border border-line bg-white transition hover:scale-105 hover:shadow disabled:cursor-default disabled:opacity-30"
         >
 
             <svg
@@ -168,11 +168,11 @@ export default function Section({
                 <h2 className="text-[22px] font-semibold">
                     {title}
                 </h2>
-
-                <div className="flex gap-2">
+                <div className="flex justify-center items-center   gap-2">
                     {arrow(-1, edge.l)}
                     {arrow(1, edge.r)}
                 </div>
+
 
             </div>
 
@@ -182,11 +182,14 @@ export default function Section({
                 </p>
             )}
 
+
             <div
                 ref={ref}
                 onScroll={update}
                 className="no-scrollbar mt-4 flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory"
             >
+
+
 
                 {items.map(it => (
                     <Card
@@ -195,7 +198,9 @@ export default function Section({
                     />
                 ))}
 
+
             </div>
+
 
         </section>
     )
